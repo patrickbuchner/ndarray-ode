@@ -11,4 +11,3 @@ itertools = "0.10.5"
 rayon = "1.6.1"
 ndarray = { version = "0.15.6", features = ["rayon"] }
 ndarray-linalg = { version = "0.16.0", features = ["openblas-static"] }
-polars = { version = "0.26.1", features = ["parquet", "ndarray"] }

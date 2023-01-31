@@ -11,7 +11,7 @@ Ordinaray differential equation solver for ndarray.
 * Lectures at [Friedrich Alexander Universität](https://www.tf.fau.de/)
 
 ## Examples
-See the [examples]() directory.
+See the [examples](https://github.com/patrickbuchner/ndarray-ode/tree/main/examples) directory.
 One can run for example: 
 ```
 cargo r -p keppler

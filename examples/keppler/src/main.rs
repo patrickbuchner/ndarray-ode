@@ -3,31 +3,72 @@ use std::path::Path;
 use ndarray::*;
 use ndarray_ode::{
     ad::*,
-    ode::{solver::SymplecticEuler, *},
+    ode::{solver::*, *},
     plot,
 };
+use rayon::prelude::*;
 
 const DOF: usize = 4;
 #[allow(non_upper_case_globals)]
 const μ: f64 = 1.;
 fn main() {
-    let h = 0.05;
+    let h = 0.0005;
     #[allow(non_snake_case)]
-    let T = 20.0;
+    let T = 2000.0;
     let x0 = array![1.0, 0.0, 0.0, 1.0];
     assert![x0.len() == DOF];
 
-    let euler = SymplecticEuler::new(x0.to_ad(), h, keppler);
-    let mut ode = Ode::new(euler, x0.to_ad());
-    ode.set_step_size(h).set_t(T);
-
-    let (time, result) = ode.run();
+    let ode = vec![ode::SymplecticEuler, ode::ImplicitEuler, ode::Expliciteuler];
 
     let current_dir = Path::new(".");
     let folder = current_dir.join("examples").join("keppler");
-    let file = std::fs::File::create(folder.join("keppler.parquet")).unwrap();
-    store(time, result, file);
+    run(ode, x0, h, T, &folder);
+
     plot::python(folder.join("plot_keppler.py"), "");
+}
+
+fn run(
+    ode: Vec<ode>,
+    x0: ArrayBase<OwnedRepr<f64>, Dim<[usize; 1]>>,
+    h: f64,
+    T: f64,
+    folder: &std::path::PathBuf,
+) {
+    ode.par_iter().for_each(|e| match e {
+        ode::SymplecticEuler => {
+            let euler = SymplecticEuler::new(x0.to_ad(), h, keppler);
+            let mut ode = Ode::new(euler, x0.to_ad());
+            ode.set_step_size(h).set_t(T);
+
+            let (time, result) = ode.run();
+            let file = std::fs::File::create(folder.join("keppler_symplectic.parquet")).unwrap();
+            store(time, result, file);
+        }
+        ode::ImplicitEuler => {
+            let euler = ImplicitEuler::new(x0.to_ad(), h, keppler);
+            let mut ode = Ode::new(euler, x0.to_ad());
+            ode.set_step_size(h).set_t(T);
+
+            let (time, result) = ode.run();
+            let file = std::fs::File::create(folder.join("keppler_implicit.parquet")).unwrap();
+            store(time, result, file);
+        }
+        ode::Expliciteuler => {
+            let euler = ExplicitEuler::new(x0.to_ad(), h, keppler);
+            let mut ode = Ode::new(euler, x0.to_ad());
+            ode.set_step_size(h).set_t(T);
+
+            let (time, result) = ode.run();
+            let file = std::fs::File::create(folder.join("keppler_explicit.parquet")).unwrap();
+            store(time, result, file);
+        }
+    });
+}
+
+enum ode {
+    SymplecticEuler,
+    ImplicitEuler,
+    Expliciteuler,
 }
 
 fn store(

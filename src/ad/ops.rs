@@ -195,4 +195,3 @@ impl ScalarMultiplyAD for AD {
         ar
     }
 }
-

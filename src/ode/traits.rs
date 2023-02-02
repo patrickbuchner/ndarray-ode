@@ -2,7 +2,7 @@ use ndarray::{Array1, Array2};
 
 use crate::ad::*;
 
-pub trait ODE< Res>
+pub trait ODE<Res>
 where
     Res: Residual + std::marker::Sync,
 {
@@ -13,18 +13,16 @@ where
     fn run(self) -> (Vec<f64>, Array2<f64>);
 }
 
-pub trait Residual
-{
+pub trait Residual {
     fn eval(&self, x_next: Array1<AD>) -> Array1<AD>;
 }
-pub trait Residual1Step
-{
+pub trait Residual1Step {
     fn update(&mut self, x0: Array1<AD>);
 }
 
-pub trait Residual2Step
-{
+pub trait Residual2Step {
     fn new(x0: Array1<AD>, x1: Array1<AD>, h: f64) -> Self;
     fn update(&mut self, x0: Array1<AD>, x1: Array1<AD>);
 }
 
+pub trait OneStepOde: Residual + Residual1Step {}

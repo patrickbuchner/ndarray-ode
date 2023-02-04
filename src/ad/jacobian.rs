@@ -12,28 +12,25 @@ use crate::ad::*;
 ///
 /// # Examples
 /// ```
-/// #[macro_use]
-/// extern crate peroxide;
-/// use peroxide::fuga::*;
-///
+/// use ndarray::{array, Array1, ArrayView1};
+/// use ndarray_ode::ad::*;
+/// use ndarray_ode::ad::jacobian;
 /// fn main() {
-///     let x = c!(1, 1);
-///     let j = jacobian(f, &x);
-///     j.print();
+///     let x = array![1., 1.];
+///     let j = jacobian(f, x.view());
+///     
+///     let expected = array!([1.0, -1.0], [1.0, 2.0]);
+///     println!("{j:?}");
 ///
 ///     //      c[0] c[1]
 ///     // r[0]    1   -1
 ///     // r[1]    1    2
 /// }
-///
-/// fn f(xs: &Vec<AD>) -> Vec<AD> {
+/// fn f(xs: ArrayView1<AD>) -> Array1<AD> {
 ///     let x = xs[0];
 ///     let y = xs[1];
-///
-///     vec![
-///        x - y,
-///        x + 2.*y,
-///    ]
+/// 
+///     array![x - y, x + 2. * y]
 /// }
 /// ```
 #[allow(non_snake_case)]

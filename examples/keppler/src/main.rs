@@ -1,11 +1,7 @@
 use std::path::Path;
 
 use ndarray::*;
-use ndarray_ode::{
-    ad::*,
-    ode::{solver::*, *},
-    plot,
-};
+use ndarray_ode::prelude::*;
 use rayon::prelude::*;
 
 const DOF: usize = 4;

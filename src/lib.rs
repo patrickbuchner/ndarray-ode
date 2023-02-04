@@ -13,10 +13,8 @@
 //! ## Keppler problem example:
 //! ```
 //! use ndarray::*;
-//! use ndarray_ode::{
-//!     ad::*,
-//!     ode::{solver::*, *},
-//! };
+//! use ndarray_ode::prelude::*;
+//! 
 //! const DOF: usize = 4;
 //! #[allow(non_upper_case_globals)]
 //! const μ: f64 = 1.;
@@ -45,3 +43,4 @@
 pub mod ad;
 pub mod ode;
 pub mod plot;
+pub mod prelude;

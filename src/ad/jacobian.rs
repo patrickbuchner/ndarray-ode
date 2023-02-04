@@ -29,7 +29,7 @@ use crate::ad::*;
 /// fn f(xs: ArrayView1<AD>) -> Array1<AD> {
 ///     let x = xs[0];
 ///     let y = xs[1];
-/// 
+///
 ///     array![x - y, x + 2. * y]
 /// }
 /// ```

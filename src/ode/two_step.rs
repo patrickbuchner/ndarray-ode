@@ -1,6 +1,8 @@
 use crate::{ad::*, ode::*};
 use ndarray::*;
 use tqdm::tqdm;
+/// This ode solver uses a two step scheme, through which one may get better solutions 
+/// but also needs to define different residual functions.
 #[allow(non_snake_case)]
 pub struct Ode<Res>
 where

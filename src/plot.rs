@@ -1,3 +1,4 @@
+/// Given a path to a png file, this command will open it automatically.
 pub fn open_png(path_to_plot: &str) {
     use std::process::Command;
 
@@ -7,11 +8,11 @@ pub fn open_png(path_to_plot: &str) {
         .output()
         .unwrap();
 }
-
-pub fn python(file: std::path::PathBuf, method_name: &str) {
+/// pass the path a python file and run it with some arguments or an empty list of arguments.
+pub fn python(file: std::path::PathBuf, arguments: &[&str]) {
     use std::io::Write;
     use std::process::Command;
-    let output = Command::new("python").arg(file).arg(method_name).output();
+    let output = Command::new("python").arg(file).args(arguments).output();
     match output {
         Ok(o) => {
             if !o.status.success() {

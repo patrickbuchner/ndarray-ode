@@ -1,6 +1,9 @@
 use crate::{ad::*, ode::*};
 use ndarray::*;
 use tqdm::tqdm;
+/// This is the most classical ode solver.
+/// From the last known step it extrapolates with a residual function, which can be for example any Runge-Kutta-scheme, to the next time step.
+/// Currently it only supports fixed timesteps `h`.
 #[allow(non_snake_case)]
 pub struct Ode<Res>
 where
@@ -16,6 +19,7 @@ impl<Res> Ode<Res>
 where
     Res: Residual + std::marker::Sync + Residual1Step,
 {
+    /// Create the ode solver with a start value and a residual function to minimize.
     pub fn new(residual: Res, initial: Array1<AD>) -> Self {
         Ode {
             residual,

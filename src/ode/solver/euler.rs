@@ -29,7 +29,8 @@ where
     fn eval(&self, x1: Array1<AD>) -> Array1<AD> {
         let h = AD::AD0(self.h);
         let x0 = self.x0_owned.view();
-        x1.clone() - x0 - h.scalar((self.flow)(x1.view()))
+        let flow = (self.flow)(x1.view());
+        x1 - x0 - h.scalar(flow)
     }
 }
 

@@ -2,6 +2,7 @@ use crate::{ad::*, ode::Residual};
 use ndarray::Array1;
 use ndarray_linalg::{error::Result, Inverse, Norm};
 
+/// Newton method for iteratively finding the next state for our problem.
 #[allow(non_snake_case)]
 #[inline]
 pub fn newton<Res>(rtol: f64, residual: &Res, mut x1: Array1<f64>) -> Result<Array1<f64>>

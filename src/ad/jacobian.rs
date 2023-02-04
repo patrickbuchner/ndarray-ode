@@ -5,7 +5,7 @@ use crate::ad::*;
 /// Jacobian Matrix
 ///
 /// # Description
-/// : Exact jacobian matrix using Automatic Differenitation
+/// Exact jacobian matrix using Automatic Differenitation
 ///
 /// # Type
 /// (Vector, F) -> Matrix where F: Fn(&Vec<AD>) -> Vec<AD>
@@ -13,8 +13,7 @@ use crate::ad::*;
 /// # Examples
 /// ```
 /// use ndarray::{array, Array1, ArrayView1};
-/// use ndarray_ode::ad::*;
-/// use ndarray_ode::ad::jacobian;
+/// use ndarray_ode::prelude::*;
 /// fn main() {
 ///     let x = array![1., 1.];
 ///     let j = jacobian(f, x.view());
@@ -50,6 +49,37 @@ pub fn jacobian<F: Fn(ArrayView1<AD>) -> Array1<AD>>(f: F, x: ArrayView1<f64>) -
     J
 }
 
+/// Jacobian Matrix
+///
+/// # Description
+/// Exact jacobian matrix using Automatic Differenitation
+/// Use it only after measuring that it is better than the normal jacobian function.
+///
+/// # Type
+/// (Vector, F) -> Matrix where F: Fn(&Vec<AD>) -> Vec<AD>
+///
+/// # Examples
+/// ```
+/// use ndarray::{array, Array1, ArrayView1};
+/// use ndarray_ode::prelude::*;
+/// fn main() {
+///     let x = array![1., 1.];
+///     let j = jacobian_par(f, x.view());
+///     
+///     let expected = array!([1.0, -1.0], [1.0, 2.0]);
+///     println!("{j:?}");
+///
+///     //      c[0] c[1]
+///     // r[0]    1   -1
+///     // r[1]    1    2
+/// }
+/// fn f(xs: ArrayView1<AD>) -> Array1<AD> {
+///     let x = xs[0];
+///     let y = xs[1];
+///
+///     array![x - y, x + 2. * y]
+/// }
+/// ```
 #[allow(non_snake_case)]
 pub fn jacobian_par<F: Fn(ArrayView1<AD>) -> Array1<AD> + std::marker::Sync>(
     f: F,
@@ -71,6 +101,37 @@ pub fn jacobian_par<F: Fn(ArrayView1<AD>) -> Array1<AD> + std::marker::Sync>(
         });
     J
 }
+/// Jacobian Matrix for [crate::ode::traits::Residual]
+///
+/// # Description
+/// Exact jacobian matrix using Automatic Differenitation
+///
+/// # Type
+/// (Vector, F) -> Matrix where F: Fn(&Vec<AD>) -> Vec<AD>
+///
+/// # Examples
+/// ```
+/// use ndarray::{array, Array1, ArrayView1};
+/// use ndarray_ode::prelude::*;
+/// fn main() {
+///     let x = array![1.0, 1.0];
+///     let res = SymplecticEuler::new(x.to_ad(), f);
+///     let j = jacobian_res(f, x.view());
+///     
+///     let expected = array!([1.0, 1.0], [0.0, -1.0]);;
+///     println!("{j:?}");
+///
+///     //      c[0] c[1]
+///     // r[0]    1    1
+///     // r[1]    0   -1
+/// }
+/// fn f(xs: ArrayView1<AD>) -> Array1<AD> {
+///     let x = xs[0];
+///     let y = xs[1];
+///
+///     array![x - y, x + 2. * y]
+/// }
+/// ```
 #[allow(non_snake_case)]
 pub fn jacobian_res<Res>(f: &Res, x: ArrayView1<f64>) -> Array2<f64>
 where
@@ -128,5 +189,19 @@ mod test {
         let y = xs[1];
 
         array![x - y, x + 2. * y]
+    }
+
+    #[test]
+    fn jacobian_res_test() {
+        use crate::prelude::*;
+        let x0 = array![1.0, 1.0];
+        let h = 1.;
+        let euler = SymplecticEuler::new(x0.to_ad(), h, f);
+        let j = jacobian_res(&euler, x0.view());
+        let expected = array!([1.0, 1.0], [0.0, -1.0]);
+        assert_eq!(expected, j);
+        //      c[0] c[1]
+        // r[0]    1    1
+        // r[1]    0   -1
     }
 }

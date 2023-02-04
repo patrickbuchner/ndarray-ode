@@ -25,3 +25,9 @@ impl<'a> Dataframe<'a> {
         Ok(())
     }
 }
+
+impl<'a> Default for Dataframe<'a> {
+    fn default() -> Self {
+        Self::new()
+    }
+}

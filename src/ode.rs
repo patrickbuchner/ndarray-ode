@@ -1,5 +1,5 @@
 mod traits;
-pub use traits::{ODE, *};
+pub use traits::*;
 pub mod root_finder;
 pub use root_finder::*;
 pub mod solver;

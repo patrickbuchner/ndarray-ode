@@ -1,27 +1,27 @@
 use crate::{ad::*, ode::*};
 use ndarray::*;
 use tqdm::tqdm;
-/// This ode solver uses a two step scheme, through which one may get better solutions 
+/// This ode solver uses a two step scheme, through which one may get better solutions
 /// but also needs to define different residual functions.
 #[allow(non_snake_case)]
-pub struct Ode<Res>
+pub struct OdeTwoStep<Scheme>
 where
-    Res: Residual + std::marker::Sync + Residual2Step,
+    Scheme: Implicit + std::marker::Sync + Residual2Step,
 {
-    residual: Res,
+    scheme: Scheme,
     x0: Array1<AD>,
     x1: Array1<AD>,
     h: f64,
     T: f64,
     ɛ: f64,
 }
-impl<Res> Ode<Res>
+impl<Scheme> OdeTwoStep<Scheme>
 where
-    Res: Residual + std::marker::Sync + Residual2Step,
+    Scheme: Implicit + std::marker::Sync + Residual2Step,
 {
-    pub fn new(residual: Res, x0: Array1<AD>, x1: Array1<AD>) -> Self {
-        Ode {
-            residual,
+    pub fn new(scheme: Scheme, x0: Array1<AD>, x1: Array1<AD>) -> Self {
+        OdeTwoStep {
+            scheme,
             x0,
             x1,
             h: 0.1,
@@ -31,9 +31,9 @@ where
     }
 }
 
-impl<Res> ODE<Res> for Ode<Res>
+impl<Scheme> ODE<Scheme> for OdeTwoStep<Scheme>
 where
-    Res: Residual + std::marker::Sync + Residual2Step,
+    Scheme: Implicit + std::marker::Sync + Residual2Step,
 {
     fn set_step_size(&mut self, h: f64) -> &mut Self {
         self.h = h;
@@ -43,11 +43,6 @@ where
     #[allow(non_snake_case)]
     fn set_t(&mut self, T: f64) -> &mut Self {
         self.T = T;
-        self
-    }
-
-    fn set_epsilon(&mut self, ɛ: f64) -> &mut Self {
-        self.ɛ = ɛ;
         self
     }
 
@@ -63,8 +58,8 @@ where
         let mut time = vec![0.0; n];
         time[1] = 1. * self.h;
         for t in tqdm(2..n) {
-            self.residual.update(x0.to_ad(), x1.to_ad());
-            match newton(f64::EPSILON, &self.residual, x1.clone()) {
+            self.scheme.update(x0.to_ad(), x1.to_ad());
+            match newton(f64::EPSILON, &self.scheme, x1.clone()) {
                 Ok(x2) => {
                     result.push_row(x2.view()).unwrap();
                     x0 = x1;

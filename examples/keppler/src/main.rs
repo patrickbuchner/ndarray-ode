@@ -8,13 +8,17 @@ const DOF: usize = 4;
 #[allow(non_upper_case_globals)]
 const μ: f64 = 1.;
 fn main() {
-    let h = 0.0005;
+    let h = 0.00005;
     #[allow(non_snake_case)]
     let T = 2000.0;
     let x0 = array![1.0, 0.0, 0.0, 1.0];
     assert![x0.len() == DOF];
 
-    let ode = vec![OdeType::SymplecticEuler, OdeType::ImplicitEuler, OdeType::Expliciteuler];
+    let ode = vec![
+        OdeType::SymplecticEuler,
+        OdeType::ImplicitEuler,
+        OdeType::Expliciteuler,
+    ];
 
     let current_dir = Path::new(".");
     let folder = current_dir.join("examples").join("keppler");
@@ -33,7 +37,7 @@ fn run(
     ode.par_iter().for_each(|e| match e {
         OdeType::SymplecticEuler => {
             let euler = SymplecticEuler::new(x0.to_ad(), h, keppler);
-            let mut ode = Ode::new(euler, x0.to_ad());
+            let mut ode = OdeIm::new(euler, x0.clone());
             ode.set_step_size(h).set_t(T);
 
             let (time, result) = ode.run();
@@ -42,7 +46,7 @@ fn run(
         }
         OdeType::ImplicitEuler => {
             let euler = ImplicitEuler::new(x0.to_ad(), h, keppler);
-            let mut ode = Ode::new(euler, x0.to_ad());
+            let mut ode = OdeIm::new(euler, x0.clone());
             ode.set_step_size(h).set_t(T);
 
             let (time, result) = ode.run();
@@ -50,8 +54,8 @@ fn run(
             store(time, result, file);
         }
         OdeType::Expliciteuler => {
-            let euler = ExplicitEuler::new(x0.to_ad(), h, keppler);
-            let mut ode = Ode::new(euler, x0.to_ad());
+            let euler = ExplicitEuler::new(h, keppler_f64);
+            let mut ode = OdeEx::new(euler, x0.clone());
             ode.set_step_size(h).set_t(T);
 
             let (time, result) = ode.run();
@@ -80,7 +84,16 @@ fn store(
     df.push(plot::Series::new("py", &result.column(3).to_vec()));
     df.store(&mut file).unwrap();
 }
+
+#[inline]
 fn keppler(x: ArrayView1<AD>) -> Array1<AD> {
+    let (x, y, px, py) = (x[0], x[1], x[2], x[3]);
+    let factor = -μ * (x * x + y * y).powi(3).sqrt();
+    array![px, py, factor * x, factor * y]
+}
+
+#[inline]
+fn keppler_f64(x: ArrayView1<f64>) -> Array1<f64> {
     let (x, y, px, py) = (x[0], x[1], x[2], x[3]);
     let factor = -μ * (x * x + y * y).powi(3).sqrt();
     array![px, py, factor * x, factor * y]

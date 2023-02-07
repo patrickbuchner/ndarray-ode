@@ -42,43 +42,31 @@ where
         self.x0_owned = x0;
     }
 }
+impl<Flow> Implicit for ImplicitEuler<Flow> where Flow: Fn(ArrayView1<AD>) -> Array1<AD> {}
 
 pub struct ExplicitEuler<Flow>
 where
-    Flow: Fn(ArrayView1<AD>) -> Array1<AD>,
+    Flow: Fn(ArrayView1<f64>) -> Array1<f64>,
 {
-    x0_owned: Array1<AD>,
     flow: Flow,
     h: f64,
 }
-impl<Flow> Residual for ExplicitEuler<Flow>
-where
-    Flow: Fn(ArrayView1<AD>) -> Array1<AD>,
-{
-    fn eval(&self, x1: Array1<AD>) -> Array1<AD> {
-        let h = AD::AD0(self.h);
-        let x0 = self.x0_owned.view();
-        x1 - x0 - h.scalar((self.flow)(x0.view()))
-    }
-}
+
 impl<Flow> ExplicitEuler<Flow>
 where
-    Flow: Fn(ArrayView1<AD>) -> Array1<AD>,
+    Flow: Fn(ArrayView1<f64>) -> Array1<f64>,
 {
-    pub fn new(x0: Array1<AD>, h: f64, flow: Flow) -> Self {
-        ExplicitEuler {
-            x0_owned: x0,
-            h,
-            flow,
-        }
+    pub fn new(h: f64, flow: Flow) -> Self {
+        ExplicitEuler { flow, h }
     }
 }
-impl<Flow> Residual1Step for ExplicitEuler<Flow>
+impl<Flow> Explicit for ExplicitEuler<Flow>
 where
-    Flow: Fn(ArrayView1<AD>) -> Array1<AD>,
+    Flow: Fn(ArrayView1<f64>) -> Array1<f64>,
 {
-    fn update(&mut self, x0: Array1<AD>) {
-        self.x0_owned = x0;
+    fn next(&self, x: ArrayView1<f64>) -> Array1<f64> {
+        let h = self.h;
+        x.to_owned() + h.scalar((self.flow)(x))
     }
 }
 
@@ -106,6 +94,7 @@ impl<Flow> Residual for SymplecticEuler<Flow>
 where
     Flow: Fn(ArrayView1<AD>) -> Array1<AD>,
 {
+    #[inline]
     fn eval(&self, x1: Array1<AD>) -> Array1<AD> {
         let h = AD::AD0(self.h);
         let x0 = self.x0_owned.view();
@@ -126,3 +115,5 @@ where
         self.x0_owned = x0;
     }
 }
+
+impl<Flow> Implicit for SymplecticEuler<Flow> where Flow: Fn(ArrayView1<AD>) -> Array1<AD> {}

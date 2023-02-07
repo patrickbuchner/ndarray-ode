@@ -29,3 +29,6 @@ proptest = "1.0.0"
 
 [workspace]
 members = ["examples/*"]
+
+# [profile.release]
+# debug = true

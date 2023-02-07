@@ -5,35 +5,29 @@ use tqdm::tqdm;
 /// From the last known step it extrapolates with a residual function, which can be for example any Runge-Kutta-scheme, to the next time step.
 /// Currently it only supports fixed timesteps `h`.
 #[allow(non_snake_case)]
-pub struct Ode<Res>
+pub struct OdeIm<Scheme>
 where
-    Res: Residual + std::marker::Sync + Residual1Step,
+    Scheme: Implicit + std::marker::Sync + Residual1Step,
 {
-    residual: Res,
+    scheme: Scheme,
     initial: Array1<AD>,
     h: f64,
     T: f64,
     ɛ: f64,
 }
-impl<Res> Ode<Res>
+impl<Scheme> OdeIm<Scheme>
 where
-    Res: Residual + std::marker::Sync + Residual1Step,
+    Scheme: Implicit + std::marker::Sync + Residual1Step,
 {
-    /// Create the ode solver with a start value and a residual function to minimize.
-    pub fn new(residual: Res, initial: Array1<AD>) -> Self {
-        Ode {
-            residual,
-            initial,
-            h: 0.1,
-            T: 1.0,
-            ɛ: f64::EPSILON,
-        }
+    pub fn set_epsilon(&mut self, ɛ: f64) -> &mut Self {
+        self.ɛ = ɛ;
+        self
     }
 }
 
-impl<Res> ODE<Res> for Ode<Res>
+impl<Scheme> ODE<Scheme> for OdeIm<Scheme>
 where
-    Res: Residual + std::marker::Sync + Residual1Step,
+    Scheme: Implicit + std::marker::Sync + Residual1Step,
 {
     fn set_step_size(&mut self, h: f64) -> &mut Self {
         self.h = h;
@@ -43,11 +37,6 @@ where
     #[allow(non_snake_case)]
     fn set_t(&mut self, T: f64) -> &mut Self {
         self.T = T;
-        self
-    }
-
-    fn set_epsilon(&mut self, ɛ: f64) -> &mut Self {
-        self.ɛ = ɛ;
         self
     }
 
@@ -61,8 +50,8 @@ where
         let mut time = vec![0.0; n];
 
         for t in tqdm(1..n) {
-            self.residual.update(x0.to_ad());
-            match newton(f64::EPSILON, &self.residual, x0.clone()) {
+            self.scheme.update(x0.to_ad());
+            match newton(f64::EPSILON, &self.scheme, x0.clone()) {
                 Ok(x1) => {
                     result.push_row(x1.view()).unwrap();
                     x0 = x1;
@@ -72,5 +61,80 @@ where
             }
         }
         (time, result)
+    }
+}
+impl<Scheme> OneStep for OdeIm<Scheme>
+where
+    Scheme: Implicit + std::marker::Sync + Residual1Step,
+{
+    type Scheme = Scheme;
+    /// Create the ode solver with a start value and a residual function to minimize.
+    fn new(scheme: Self::Scheme, initial: Array1<f64>) -> Self {
+        OdeIm {
+            scheme,
+            initial: initial.to_ad(),
+            h: 0.1,
+            T: 1.0,
+            ɛ: f64::EPSILON,
+        }
+    }
+}
+#[allow(non_snake_case)]
+pub struct OdeEx<Scheme>
+where
+    Scheme: Explicit + std::marker::Sync,
+{
+    scheme: Scheme,
+    initial: Array1<f64>,
+    h: f64,
+    T: f64,
+}
+
+impl<Scheme> ODE<Scheme> for OdeEx<Scheme>
+where
+    Scheme: Explicit + std::marker::Sync,
+{
+    fn set_step_size(&mut self, h: f64) -> &mut Self {
+        self.h = h;
+        self
+    }
+
+    #[allow(non_snake_case)]
+    fn set_t(&mut self, T: f64) -> &mut Self {
+        self.T = T;
+        self
+    }
+
+    fn run(self) -> (Vec<f64>, Array2<f64>) {
+        let n: f64 = self.T / self.h;
+        let n = n.floor() as usize;
+        let mut x0 = self.initial.clone();
+
+        let mut result: Array2<f64> = Array::zeros((0, x0.len()));
+        result.push_row(self.initial.view()).unwrap();
+        let mut time = vec![0.0; n];
+
+        for t in tqdm(1..n) {
+            let x1 = self.scheme.next(x0.view());
+            result.push_row(x1.view()).unwrap();
+            x0 = x1;
+            time[t] = t as f64 * self.h;
+        }
+        (time, result)
+    }
+}
+
+impl<Scheme> OneStep for OdeEx<Scheme>
+where
+    Scheme: Explicit + std::marker::Sync,
+{
+    type Scheme = Scheme;
+    fn new(scheme: Self::Scheme, initial: Array1<f64>) -> Self {
+        OdeEx {
+            scheme,
+            initial,
+            h: 0.1,
+            T: 1.0,
+        }
     }
 }

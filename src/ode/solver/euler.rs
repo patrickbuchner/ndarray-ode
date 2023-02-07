@@ -1,4 +1,4 @@
-use ndarray::{s, Array1, ArrayView1, Axis};
+use ndarray::{array, s, Array1, ArrayView1, Axis};
 
 use crate::{ad::*, ode::*};
 
@@ -14,9 +14,9 @@ impl<Flow> ImplicitEuler<Flow>
 where
     Flow: Fn(ArrayView1<AD>) -> Array1<AD>,
 {
-    pub fn new(x0: Array1<AD>, h: f64, flow: Flow) -> Self {
+    pub fn new(h: f64, flow: Flow) -> Self {
         ImplicitEuler {
-            x0_owned: x0,
+            x0_owned: array![],
             h,
             flow,
         }
@@ -82,9 +82,9 @@ impl<Flow> SymplecticEuler<Flow>
 where
     Flow: Fn(ArrayView1<AD>) -> Array1<AD>,
 {
-    pub fn new(x0: Array1<AD>, h: f64, flow: Flow) -> Self {
+    pub fn new(h: f64, flow: Flow) -> Self {
         SymplecticEuler {
-            x0_owned: x0,
+            x0_owned: array![],
             h,
             flow,
         }

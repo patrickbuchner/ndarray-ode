@@ -32,8 +32,8 @@
 //!     let x0 = array![1.0, 0.0, 0.0, 1.0];
 //!     assert![x0.len() == DOF];
 //!
-//!     let euler = SymplecticEuler::new(x0.to_ad(), h, keppler);
-//!     let mut ode = Ode::new(euler, x0.to_ad());
+//!     let euler = SymplecticEuler::new(h, keppler);
+//!     let mut ode = Ode::implicit(euler, x0.clone());
 //!     ode.set_step_size(h).set_t(T);
 //!     
 //!     let (time, result) = ode.run();

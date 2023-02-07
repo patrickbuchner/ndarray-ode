@@ -13,7 +13,7 @@ where
     x1: Array1<AD>,
     h: f64,
     T: f64,
-    ɛ: f64,
+    _ɛ: f64,
 }
 impl<Scheme> OdeTwoStep<Scheme>
 where
@@ -26,7 +26,7 @@ where
             x1,
             h: 0.1,
             T: 1.0,
-            ɛ: f64::EPSILON,
+            _ɛ: f64::EPSILON,
         }
     }
 }
@@ -70,5 +70,9 @@ where
             }
         }
         (time, result)
+    }
+
+    fn set_with_tqdm(&mut self, _with_tqdm:bool) ->&mut Self {
+        todo!()
     }
 }

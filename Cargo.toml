@@ -22,9 +22,9 @@ criterion = "0.4"
 rstest = "0.16.0"
 proptest = "1.0.0"
 
-# [[bench]]
-# name = "solver"
-# harness = false
+[[bench]]
+name = "solver"
+harness = false
 
 
 [workspace]

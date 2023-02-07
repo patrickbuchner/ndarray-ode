@@ -10,7 +10,7 @@ const μ: f64 = 1.;
 fn main() {
     let h = 0.00005;
     #[allow(non_snake_case)]
-    let T = 2000.0;
+    let T = 200.0;
     let x0 = array![1.0, 0.0, 0.0, 1.0];
     assert![x0.len() == DOF];
 
@@ -36,8 +36,8 @@ fn run(
 ) {
     ode.par_iter().for_each(|e| match e {
         OdeType::SymplecticEuler => {
-            let euler = SymplecticEuler::new(x0.to_ad(), h, keppler);
-            let mut ode = OdeIm::new(euler, x0.clone());
+            let euler = SymplecticEuler::new(h, keppler);
+            let mut ode = Ode::implicit(euler, x0.clone());
             ode.set_step_size(h).set_t(T);
 
             let (time, result) = ode.run();
@@ -45,8 +45,8 @@ fn run(
             store(time, result, file);
         }
         OdeType::ImplicitEuler => {
-            let euler = ImplicitEuler::new(x0.to_ad(), h, keppler);
-            let mut ode = OdeIm::new(euler, x0.clone());
+            let euler = ImplicitEuler::new(h, keppler);
+            let mut ode = Ode::implicit(euler, x0.clone());
             ode.set_step_size(h).set_t(T);
 
             let (time, result) = ode.run();
@@ -55,7 +55,7 @@ fn run(
         }
         OdeType::Expliciteuler => {
             let euler = ExplicitEuler::new(h, keppler_f64);
-            let mut ode = OdeEx::new(euler, x0.clone());
+            let mut ode = Ode::explicit(euler, x0.clone());
             ode.set_step_size(h).set_t(T);
 
             let (time, result) = ode.run();

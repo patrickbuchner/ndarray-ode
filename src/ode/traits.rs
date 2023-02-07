@@ -16,6 +16,8 @@ pub trait ODE<Scheme>
     /// Set the total runtime of the simulation.
     #[allow(non_snake_case)]
     fn set_t(&mut self, T: f64) -> &mut Self;
+    /// To deactivate tqdm during runtime
+    fn set_with_tqdm(&mut self, with_tqdm:bool) ->&mut Self;
     /// Consumes the defined ODE and runs the simulation.
     ///
     /// It returns a vector of all time steps and an array which corresponds to the state at each timestep.

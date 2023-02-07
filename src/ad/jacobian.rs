@@ -115,8 +115,10 @@ pub fn jacobian_par<F: Fn(ArrayView1<AD>) -> Array1<AD> + std::marker::Sync>(
 /// use ndarray_ode::prelude::*;
 /// fn main() {
 ///     let x = array![1.0, 1.0];
-///     let res = SymplecticEuler::new(x.to_ad(), f);
-///     let j = jacobian_res(f, x.view());
+///     let h = 0.1; 
+///     let mut res = SymplecticEuler::new(h, f);
+///     res.update(x.to_ad());
+///     let j = jacobian_res(&res, x.view());
 ///     
 ///     let expected = array!([1.0, 1.0], [0.0, -1.0]);;
 ///     println!("{j:?}");
@@ -196,7 +198,8 @@ mod test {
         use crate::prelude::*;
         let x0 = array![1.0, 1.0];
         let h = 1.;
-        let euler = SymplecticEuler::new(x0.to_ad(), h, f);
+        let mut euler = SymplecticEuler::new(h, f);
+        euler.update(x0.to_ad());
         let j = jacobian_res(&euler, x0.view());
         let expected = array!([1.0, 1.0], [0.0, -1.0]);
         assert_eq!(expected, j);

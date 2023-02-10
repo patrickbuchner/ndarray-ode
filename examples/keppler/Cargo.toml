@@ -9,5 +9,9 @@ edition = "2021"
 ndarray-ode = { version = "0.1", path = "../../" }
 itertools = "0.10.5"
 rayon = "1.6.1"
-ndarray = { version = "0.15.6", features = ["rayon"] }
+ndarray = { version = "0.15.6", features = ["rayon", "blas"] }
 ndarray-linalg = { version = "0.16.0", features = ["openblas-static"] }
+
+
+# [profile.release]
+# debug = true

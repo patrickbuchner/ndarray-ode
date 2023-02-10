@@ -11,8 +11,11 @@ descriptions = "ODE Solver based on ndarray ecosystem"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ndarray = { version = "0.15.6", features = ["rayon"] }
+blas-src = { version = "0.8.0", features = ["openblas"] }
+itertools = "0.10.5"
+ndarray = { version = "0.15.6", features = ["rayon", "blas"] }
 ndarray-linalg = { version = "0.16.0", features = ["openblas-static"] }
+openblas-src = { version = "0.10.8", features = ["static"] }
 polars = { version = "0.26.1", features = ["parquet"] }
 rayon = "1.6.1"
 tqdm = "0.4.3"

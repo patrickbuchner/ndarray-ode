@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{path::Path, time::Instant};
 
 use ndarray::*;
 use ndarray_ode::prelude::*;
@@ -8,9 +8,9 @@ const DOF: usize = 4;
 #[allow(non_upper_case_globals)]
 const μ: f64 = 1.;
 fn main() {
-    let h = 0.00005;
+    let h = 0.0005;
     #[allow(non_snake_case)]
-    let T = 200.0;
+    let T = 2000.0;
     let x0 = array![1.0, 0.0, 0.0, 1.0];
     assert![x0.len() == DOF];
 
@@ -34,11 +34,11 @@ fn run(
     T: f64,
     folder: &std::path::PathBuf,
 ) {
-    ode.par_iter().for_each(|e| match e {
+    ode.iter().for_each(|e| match e {
         OdeType::SymplecticEuler => {
             let euler = SymplecticEuler::new(h, keppler);
             let mut ode = Ode::implicit(euler, x0.clone());
-            ode.set_step_size(h).set_t(T);
+            ode.set_step_size(h).set_t(T).set_with_tqdm(false);
 
             let (time, result) = ode.run();
             let file = std::fs::File::create(folder.join("keppler_symplectic.parquet")).unwrap();
@@ -56,7 +56,7 @@ fn run(
         OdeType::Expliciteuler => {
             let euler = ExplicitEuler::new(h, keppler_f64);
             let mut ode = Ode::explicit(euler, x0.clone());
-            ode.set_step_size(h).set_t(T);
+            ode.set_step_size(h).set_t(T).set_with_tqdm(false);
 
             let (time, result) = ode.run();
             let file = std::fs::File::create(folder.join("keppler_explicit.parquet")).unwrap();

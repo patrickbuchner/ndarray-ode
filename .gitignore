@@ -2,3 +2,6 @@
 *.parquet
 Cargo.lock
 .vscode
+perf.data
+flamegraph.svg
+perf.data.old

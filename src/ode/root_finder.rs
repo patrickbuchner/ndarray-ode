@@ -13,7 +13,7 @@ where
     let mut Dg = jacobian_res(residual, x1.view());
     let mut DG_inv = Dg.inv()?;
     // x1 - (x0+h*f(x1)) = g(x1) != 0
-    let mut G = residual.eval(x1.to_ad()).to_f64();
+    let mut G = residual.eval(x1.to_ad().view()).to_f64();
     let mut num_iter: usize = 0;
     let mut err = G.norm();
     // 3. Iteration
@@ -26,7 +26,7 @@ where
         Dg = jacobian_res(residual, x1.view());
         DG_inv = Dg.inv()?;
         // g(x1) != 0
-        G = residual.eval(x1.to_ad()).to_f64();
+        G = residual.eval(x1.to_ad().view()).to_f64();
         err = G.norm();
         num_iter += 1;
     }

@@ -141,13 +141,13 @@ where
 {
     let l = x.len();
     let mut J = Array2::zeros((l, l));
+    let mut x_ad: Array1<AD> = x.iter().map(|&x| AD1(x, 0f64)).collect();
     J.axis_iter_mut(Axis(1))
         // .into_par_iter()
         .enumerate()
         .for_each(|(i, mut col)| {
-            let mut x_ad: Array1<AD> = x.iter().map(|&x| AD1(x, 0f64)).collect();
             x_ad[i][1] = 1f64;
-            let slopes: Vec<f64> = f.eval(x_ad).iter().map(|ad| ad.dx()).collect();
+            let slopes: Vec<f64> = f.eval(x_ad.view()).iter().map(|ad| ad.dx()).collect();
             for (c, s) in col.iter_mut().zip(slopes.iter()) {
                 *c = *s;
             }

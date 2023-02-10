@@ -1,3 +1,4 @@
+use itertools::izip;
 use ndarray::{array, s, Array1, ArrayView1, Axis};
 
 use crate::{ad::*, ode::*};
@@ -26,11 +27,13 @@ impl<Flow> Residual for ImplicitEuler<Flow>
 where
     Flow: Fn(ArrayView1<AD>) -> Array1<AD>,
 {
-    fn eval(&self, x1: Array1<AD>) -> Array1<AD> {
+    #[inline]
+    fn eval(&self, x1: ArrayView1<AD>) -> Array1<AD> {
         let h = AD::AD0(self.h);
         let x0 = self.x0_owned.view();
         let flow = (self.flow)(x1.view());
-        x1 - x0 - h.scalar(flow)
+        // x1 - x0 - h.scalar(flow)
+        izip!(x1.iter(), x0.iter(), flow.iter()).map(|(&x1, &x0, &f)| x1 - x0 - h * f).collect()
     }
 }
 
@@ -38,6 +41,7 @@ impl<Flow> Residual1Step for ImplicitEuler<Flow>
 where
     Flow: Fn(ArrayView1<AD>) -> Array1<AD>,
 {
+    #[inline]
     fn update(&mut self, x0: Array1<AD>) {
         self.x0_owned = x0;
     }
@@ -64,9 +68,11 @@ impl<Flow> Explicit for ExplicitEuler<Flow>
 where
     Flow: Fn(ArrayView1<f64>) -> Array1<f64>,
 {
+    #[inline]
     fn next(&self, x: ArrayView1<f64>) -> Array1<f64> {
         let h = self.h;
-        x.to_owned() + h.scalar((self.flow)(x))
+        let flow =(self.flow)(x);
+        izip!( x.iter(), flow.iter()).map(|( &x0, &f)| x0 + h * f).collect()
     }
 }
 
@@ -95,7 +101,7 @@ where
     Flow: Fn(ArrayView1<AD>) -> Array1<AD>,
 {
     #[inline]
-    fn eval(&self, x1: Array1<AD>) -> Array1<AD> {
+    fn eval(&self, x1: ArrayView1<AD>) -> Array1<AD> {
         let h = AD::AD0(self.h);
         let x0 = self.x0_owned.view();
         let mut q0 = x0.slice(s![..x0.len() / 2_usize]).to_owned();
@@ -103,7 +109,9 @@ where
         // let _q1 = x1.slice(s![..x0.len() / 2 as usize]);
         let p1 = x1.slice(s![x0.len() / 2_usize..]);
         _ = q0.append(Axis(0), p1.view());
-        x1 - x0 - h.scalar((self.flow)(q0.view()))
+        let f = (self.flow)(q0.view());
+        izip!(x1.iter(), x0.iter(), f.iter()).map(|(&x1, &x0, &f)| x1 - x0 - h * f).collect()
+        // x1 - x0 - h.scalar((self.flow)(q0.view()))
     }
 }
 
@@ -111,6 +119,7 @@ impl<Flow> Residual1Step for SymplecticEuler<Flow>
 where
     Flow: Fn(ArrayView1<AD>) -> Array1<AD>,
 {
+    #[inline]
     fn update(&mut self, x0: Array1<AD>) {
         self.x0_owned = x0;
     }

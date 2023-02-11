@@ -37,7 +37,11 @@ where
         self.scheme.update(x0.to_ad());
         match newton(f64::EPSILON, &self.scheme, x0.clone()) {
             Ok(x1) => {
-                result.push_row(x1.view()).unwrap();
+                result
+                    .row_mut(t)
+                    .iter_mut()
+                    .zip(x1.iter())
+                    .for_each(|(x, &y)| *x = y);
                 time[t] = t as f64 * self.h;
                 x1
             }
@@ -66,8 +70,12 @@ where
         let n = n.floor() as usize;
         let mut x0 = self.initial.clone().to_f64();
 
-        let mut result: Array2<f64> = Array::zeros((0, x0.len()));
-        result.push_row(self.initial.to_f64().view()).unwrap();
+        let mut result: Array2<f64> = Array::zeros((n, x0.len()));
+        result
+            .row_mut(0)
+            .iter_mut()
+            .zip(self.initial.to_f64().iter())
+            .for_each(|(x, &y)| *x = y); //(self.initial.to_f64().view()).unwrap();
         let mut time = vec![0.0; n];
 
         if self.with_tqdm {
@@ -137,8 +145,12 @@ where
         let n = n.floor() as usize;
         let mut x0 = self.initial.clone();
 
-        let mut result: Array2<f64> = Array::zeros((0, x0.len()));
-        result.push_row(self.initial.view()).unwrap();
+        let mut result: Array2<f64> = Array::zeros((n, x0.len()));
+        result
+            .row_mut(0)
+            .iter_mut()
+            .zip(x0.iter())
+            .for_each(|(x, &y)| *x = y);
         let mut time = vec![0.0; n];
 
         if self.with_tqdm {
@@ -171,8 +183,16 @@ where
         result: &mut Array2<f64>,
         time: &mut Vec<f64>,
     ) -> Array1<f64> {
+        // let mut x1 = result.row_mut(t);
+
+        // self.scheme.next1(x0.view(), x1);
+
         let x1 = self.scheme.next(x0.view());
-        result.push_row(x1.view()).unwrap();
+        result
+            .row_mut(t)
+            .iter_mut()
+            .zip(x1.iter())
+            .for_each(|(x, &y)| *x = y);
         time[t] = t as f64 * self.h;
         x1
     }

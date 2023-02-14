@@ -7,10 +7,15 @@ use rayon::prelude::*;
 const DOF: usize = 4;
 #[allow(non_upper_case_globals)]
 const μ: f64 = 1.;
+#[cfg(feature = "dhat-heap")]
+#[global_allocator]
+static ALLOC: dhat::Alloc = dhat::Alloc;
 fn main() {
+    #[cfg(feature = "dhat-heap")]
+    let _profiler = dhat::Profiler::new_heap();
     let h = 0.0005;
     #[allow(non_snake_case)]
-    let T = 2000.0;
+    let T = 200.0;
     let x0 = array![1.0, 0.0, 0.0, 1.0];
     assert![x0.len() == DOF];
 

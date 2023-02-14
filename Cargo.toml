@@ -6,7 +6,7 @@ authors = ["Patrick Buchner <patrick.buchner@mailbox.org"]
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 publish = false
-descriptions = "ODE Solver based on ndarray ecosystem"
+description = "ODE Solver based on ndarray ecosystem"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -33,5 +33,8 @@ harness = false
 [workspace]
 members = ["examples/*"]
 
-# [profile.release]
-# debug = true
+[profile.release]
+debug = true
+
+[features]
+dhat-heap = []

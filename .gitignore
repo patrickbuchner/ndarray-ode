@@ -5,3 +5,4 @@ Cargo.lock
 perf.data
 flamegraph.svg
 perf.data.old
+dhat-heap.json

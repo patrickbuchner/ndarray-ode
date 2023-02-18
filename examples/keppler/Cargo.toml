@@ -14,5 +14,11 @@ ndarray-linalg = { version = "0.16.0", features = ["openblas-static"] }
 dhat = "0.3.2"
 
 
-# [profile.release]
-# debug = true
+[profile.release]
+debug = 1
+
+[rust]
+debuginfo-level = 1
+
+[features]
+dhat-heap = []

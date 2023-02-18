@@ -43,7 +43,7 @@ fn run(
         OdeType::SymplecticEuler => {
             let euler = SymplecticEuler::new(h, keppler);
             let mut ode = Ode::implicit(euler, x0.clone());
-            ode.set_step_size(h).set_t(T).set_with_tqdm(true);
+            ode.set_step_size(h).set_t(T).set_with_progress(true);
 
             let (time, result) = ode.run();
             let file = std::fs::File::create(folder.join("keppler_symplectic.parquet")).unwrap();
@@ -52,7 +52,7 @@ fn run(
         OdeType::ImplicitEuler => {
             let euler = ImplicitEuler::new(h, keppler);
             let mut ode = Ode::implicit(euler, x0.clone());
-            ode.set_step_size(h).set_t(T).set_with_tqdm(true);
+            ode.set_step_size(h).set_t(T).set_with_progress(true);
 
             let (time, result) = ode.run();
             let file = std::fs::File::create(folder.join("keppler_implicit.parquet")).unwrap();
@@ -61,7 +61,7 @@ fn run(
         OdeType::Expliciteuler => {
             let euler = ExplicitEuler::new(h, keppler_f64);
             let mut ode = Ode::explicit(euler, x0.clone());
-            ode.set_step_size(h).set_t(T).set_with_tqdm(true);
+            ode.set_step_size(h).set_t(T).set_with_progress(true);
 
             let (time, result) = ode.run();
             let file = std::fs::File::create(folder.join("keppler_explicit.parquet")).unwrap();
@@ -91,10 +91,15 @@ fn store(
 }
 
 #[inline]
-fn keppler(x: ArrayView1<AD>) -> Array1<AD> {
+fn keppler(x: ArrayView1<AD>, update: &mut Array1<AD>) {
     let (x, y, px, py) = (x[0], x[1], x[2], x[3]);
     let factor = -μ * (x * x + y * y).powi(3).sqrt();
-    array![px, py, factor * x, factor * y]
+
+    update[0] = px;
+    update[1] = py;
+    update[2] = factor * x;
+    update[3] = factor * y;
+    // array![px, py, factor * x, factor * y]
 }
 
 #[inline]

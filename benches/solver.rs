@@ -31,7 +31,7 @@ criterion_main!(benches);
 fn explicit_euler(x0: ArrayView1<f64>, h: f64, T: f64) {
     let ex_euler = ExplicitEuler::new(h, undamped_oscilator_f64);
     let mut ode = Ode::explicit(ex_euler, x0.to_owned());
-    ode.set_step_size(h).set_t(T).set_with_tqdm(false);
+    ode.set_step_size(h).set_t(T).set_with_progress(false);
     ode.run();
 }
 
@@ -39,7 +39,7 @@ fn explicit_euler(x0: ArrayView1<f64>, h: f64, T: f64) {
 fn implicit_euler(x0: ArrayView1<f64>, h: f64, T: f64) {
     let im_euler = ImplicitEuler::new(h, undamped_oscilator_ad);
     let mut ode = Ode::implicit(im_euler, x0.to_owned());
-    ode.set_step_size(h).set_t(T).set_with_tqdm(false);
+    ode.set_step_size(h).set_t(T).set_with_progress(false);
     ode.run();
 }
 
@@ -47,15 +47,16 @@ fn implicit_euler(x0: ArrayView1<f64>, h: f64, T: f64) {
 fn symplectic_euler(x0: ArrayView1<f64>, h: f64, T: f64) {
     let sym_euler = SymplecticEuler::new(h, undamped_oscilator_ad);
     let mut ode = Ode::implicit(sym_euler, x0.to_owned());
-    ode.set_step_size(h).set_t(T).set_with_tqdm(false);
+    ode.set_step_size(h).set_t(T).set_with_progress(false);
     ode.run();
 }
 
-fn undamped_oscilator_ad(x: ArrayView1<AD>) -> Array1<AD> {
+fn undamped_oscilator_ad(x: ArrayView1<AD>, update: &mut Array1<AD>) {
     let m = 1.0;
     let c = 1.0;
     let (q, p) = (x[0], x[1]);
-    array![p / m, -q / c]
+    update[0] = p / m;
+    update[1] = -q / c;
 }
 
 fn undamped_oscilator_f64(x: ArrayView1<f64>) -> Array1<f64> {

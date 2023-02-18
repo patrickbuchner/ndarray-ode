@@ -16,7 +16,7 @@ pub trait ODE<Scheme> {
     #[allow(non_snake_case)]
     fn set_t(&mut self, T: f64) -> &mut Self;
     /// To deactivate tqdm during runtime
-    fn set_with_tqdm(&mut self, with_tqdm: bool) -> &mut Self;
+    fn set_with_progress(&mut self, with_progress: bool) -> &mut Self;
     /// Consumes the defined ODE and runs the simulation.
     ///
     /// It returns a vector of all time steps and an array which corresponds to the state at each timestep.
@@ -40,7 +40,7 @@ pub trait TwoStep {
 /// It was introduced for implicit methods.
 pub trait Residual {
     /// A function that shall evaluate with the corrext `x` to zero.
-    fn eval(&self, x_next: ArrayView1<AD>) -> Array1<AD>;
+    fn eval(&self, x_next: ArrayView1<AD>, update: &mut Array1<AD>) ;
 }
 /// Updates current x0, so that the residual for the next step can be calculated.
 pub trait Residual1Step {

@@ -1,4 +1,5 @@
 use crate::{ad::*, ode::*};
+use indicatif::ProgressIterator;
 use ndarray::*;
 use tqdm::tqdm;
 
@@ -16,7 +17,7 @@ where
     h: f64,
     T: f64,
     ɛ: f64,
-    with_tqdm: bool,
+    with_progress: bool,
 }
 impl<Scheme> OdeIm<Scheme>
 where
@@ -27,21 +28,24 @@ where
         self
     }
     #[inline]
+    #[allow(non_snake_case)]
     fn execute(
         &mut self,
         t: usize,
-        x0: Array1<f64>,
+        x0: Array1<AD>,
         result: &mut Array2<f64>,
         time: &mut Vec<f64>,
-    ) -> Array1<f64> {
-        self.scheme.update(x0.to_ad());
-        match newton(f64::EPSILON, &self.scheme, x0.clone()) {
+        J: &mut Array2<f64>,
+        slope_buffer: &mut Array1<AD>,
+    ) -> Array1<AD> {
+        self.scheme.update(x0.clone());
+        match newton(f64::EPSILON, &self.scheme, x0.clone(), J, slope_buffer) {
             Ok(x1) => {
                 result
                     .row_mut(t)
                     .iter_mut()
                     .zip(x1.iter())
-                    .for_each(|(x, &y)| *x = y);
+                    .for_each(|(x, &y)| *x = y.x());
                 time[t] = t as f64 * self.h;
                 x1
             }
@@ -65,10 +69,11 @@ where
         self
     }
 
+    #[allow(non_snake_case)]
     fn run(mut self) -> (Vec<f64>, Array2<f64>) {
         let n: f64 = self.T / self.h;
         let n = n.floor() as usize;
-        let mut x0 = self.initial.clone().to_f64();
+        let mut x0 = self.initial.clone();
 
         let mut result: Array2<f64> = Array::zeros((n, x0.len()));
         result
@@ -78,21 +83,25 @@ where
             .for_each(|(x, &y)| *x = y); //(self.initial.to_f64().view()).unwrap();
         let mut time = vec![0.0; n];
 
-        if self.with_tqdm {
+        let l = x0.len();
+        let mut J = Array2::zeros((l, l));
+        let mut slope_buffer = x0.clone();
+
+        if self.with_progress {
             for t in tqdm(1..n) {
-                x0 = self.execute(t, x0, &mut result, &mut time);
+                x0 = self.execute(t, x0, &mut result, &mut time, &mut J, &mut slope_buffer);
             }
         } else {
             for t in 1..n {
-                x0 = self.execute(t, x0, &mut result, &mut time);
+                x0 = self.execute(t, x0, &mut result, &mut time, &mut J, &mut slope_buffer);
             }
         }
 
         (time, result)
     }
 
-    fn set_with_tqdm(&mut self, with_tqdm: bool) -> &mut Self {
-        self.with_tqdm = with_tqdm;
+    fn set_with_progress(&mut self, with_progress: bool) -> &mut Self {
+        self.with_progress = with_progress;
         self
     }
 }
@@ -109,7 +118,7 @@ where
             h: 0.1,
             T: 1.0,
             ɛ: f64::EPSILON,
-            with_tqdm: true,
+            with_progress: true,
         }
     }
 }
@@ -122,7 +131,7 @@ where
     initial: Array1<f64>,
     h: f64,
     T: f64,
-    with_tqdm: bool,
+    with_progress: bool,
 }
 
 impl<Scheme> ODE<Scheme> for OdeEx<Scheme>
@@ -153,7 +162,7 @@ where
             .for_each(|(x, &y)| *x = y);
         let mut time = vec![0.0; n];
 
-        if self.with_tqdm {
+        if self.with_progress {
             for t in tqdm(1..n) {
                 x0 = self.execute(t, x0, &mut result, &mut time);
             }
@@ -165,8 +174,8 @@ where
         (time, result)
     }
 
-    fn set_with_tqdm(&mut self, with_tqdm: bool) -> &mut Self {
-        self.with_tqdm = with_tqdm;
+    fn set_with_progress(&mut self, with_progress: bool) -> &mut Self {
+        self.with_progress = with_progress;
         self
     }
 }
@@ -209,7 +218,7 @@ where
             initial,
             h: 0.1,
             T: 1.0,
-            with_tqdm: true,
+            with_progress: true,
         }
     }
 }

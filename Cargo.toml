@@ -12,6 +12,7 @@ description = "ODE Solver based on ndarray ecosystem"
 
 [dependencies]
 blas-src = { version = "0.8.0", features = ["openblas"] }
+indicatif = "0.17.3"
 itertools = "0.10.5"
 ndarray = { version = "0.15.6", features = ["rayon", "blas"] }
 ndarray-linalg = { version = "0.16.0", features = ["openblas-static"] }
@@ -36,5 +37,3 @@ members = ["examples/*"]
 [profile.release]
 debug = true
 
-[features]
-dhat-heap = []

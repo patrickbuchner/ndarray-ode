@@ -34,7 +34,7 @@ where
         // let _q1 = x1.slice(s![..x0.len() / 2 as usize]);
         let p1 = x1.slice(s![x0.len() / 2_usize..]);
         _ = q0.append(Axis(0), p1);
-         (self.flow)(q0.view(), update);
+        (self.flow)(q0.view(), update);
         Zip::from(x1)
             .and(x0)
             .and(update)

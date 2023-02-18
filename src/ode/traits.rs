@@ -40,7 +40,7 @@ pub trait TwoStep {
 /// It was introduced for implicit methods.
 pub trait Residual {
     /// A function that shall evaluate with the corrext `x` to zero.
-    fn eval(&self, x_next: ArrayView1<AD>, update: &mut Array1<AD>) ;
+    fn eval(&self, x_next: ArrayView1<AD>, update: &mut Array1<AD>);
 }
 /// Updates current x0, so that the residual for the next step can be calculated.
 pub trait Residual1Step {

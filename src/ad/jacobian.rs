@@ -121,7 +121,7 @@ pub fn jacobian_par<F: Fn(ArrayView1<AD>) -> Array1<AD> + std::marker::Sync>(
 ///     let l = x.len();
 ///     let mut J = Array2::zeros((l, l));
 ///     let mut slope_buffer = x.to_ad();
-/// 
+///
 ///     jacobian_res(&res, x.view(), &mut J, &mut slope_buffer);
 ///     
 ///     let expected = array!([1.0, 1.0], [0.0, -1.0]);;

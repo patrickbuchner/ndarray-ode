@@ -79,13 +79,13 @@ where
                     x1 = x2;
                     time[t] = t as f64 * self.h;
                 }
-                Err(_) => todo!(),
+                Err(e) => eprintln!("Did not converge, how to handle it?\n{e}"),
             }
         }
         (time, result)
     }
 
     fn set_with_progress(&mut self, _with_tqdm: bool) -> &mut Self {
-        todo!()
+        todo!("Implement setting the progress, currently always show it.")
     }
 }

@@ -13,12 +13,8 @@ ndarray = { version = "0.15.6", features = ["rayon", "blas"] }
 ndarray-linalg = { version = "0.16.0", features = ["openblas-static"] }
 dhat = "0.3.2"
 
-
 [profile.release]
 debug = 1
-
-[rust]
-debuginfo-level = 1
 
 [features]
 dhat-heap = []

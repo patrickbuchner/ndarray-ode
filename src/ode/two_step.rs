@@ -57,22 +57,35 @@ where
         result.push_row(self.x1.to_f64().view()).unwrap();
         let mut time = vec![0.0; n];
         time[1] = 1. * self.h;
-        // for t in tqdm(2..n) {
-        //     self.scheme.update(x0.to_ad(), x1.to_ad());
-        //     match newton(f64::EPSILON, &self.scheme, x1.clone()) {
-        //         Ok(x2) => {
-        //             result.push_row(x2.view()).unwrap();
-        //             x0 = x1;
-        //             x1 = x2;
-        //             time[t] = t as f64 * self.h;
-        //         }
-        //         Err(_) => todo!(),
-        //     }
-        // }
+
+        let l = x0.len();
+        #[allow(non_snake_case)]
+        let mut J = Array2::zeros((l, l));
+        let mut slope_buffer = x0.to_ad();
+
+        for t in tqdm(2..n) {
+            self.scheme.update(x0.to_ad(), x1.to_ad());
+            match newton(
+                f64::EPSILON,
+                &self.scheme,
+                x1.to_ad(),
+                &mut J,
+                &mut slope_buffer,
+            ) {
+                Ok(x2) => {
+                    let x2 = x2.to_f64();
+                    result.push_row(x2.view()).unwrap();
+                    x0 = x1;
+                    x1 = x2;
+                    time[t] = t as f64 * self.h;
+                }
+                Err(_) => todo!(),
+            }
+        }
         (time, result)
     }
 
-    fn set_with_progress(&mut self, _with_tqdm:bool) ->&mut Self {
+    fn set_with_progress(&mut self, _with_tqdm: bool) -> &mut Self {
         todo!()
     }
 }

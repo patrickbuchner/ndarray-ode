@@ -19,10 +19,13 @@
 //! #[allow(non_upper_case_globals)]
 //! const μ: f64 = 1.;
 //!
-//! fn keppler(x: ArrayView1<AD>) -> Array1<AD> {
+//! fn keppler(x: ArrayView1<AD>, update: &mut Array1<AD>) {
 //! let (x, y, px, py) = (x[0], x[1], x[2], x[3]);
 //! let factor = -μ * (x * x + y * y).powi(3).sqrt();
-//! array![px, py, factor * x, factor * y]
+//! update[0] = px;
+//! update[1] = py;
+//! update[2] = factor * x;
+//! update[3] = factor * y;
 //! }
 //!
 //! fn main() {

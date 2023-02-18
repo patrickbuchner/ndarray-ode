@@ -111,27 +111,32 @@ pub fn jacobian_par<F: Fn(ArrayView1<AD>) -> Array1<AD> + std::marker::Sync>(
 ///
 /// # Examples
 /// ```
-/// use ndarray::{array, Array1, ArrayView1};
+/// use ndarray::{array, Array1, Array2, ArrayView1};
 /// use ndarray_ode::prelude::*;
 /// fn main() {
 ///     let x = array![1.0, 1.0];
 ///     let h = 0.1;
 ///     let mut res = SymplecticEuler::new(h, f);
 ///     res.update(x.to_ad());
-///     let j = jacobian_res(&res, x.view());
+///     let l = x.len();
+///     let mut J = Array2::zeros((l, l));
+///     let mut slope_buffer = x.to_ad();
+/// 
+///     jacobian_res(&res, x.view(), &mut J, &mut slope_buffer);
 ///     
 ///     let expected = array!([1.0, 1.0], [0.0, -1.0]);;
-///     println!("{j:?}");
+///     println!("{J:?}");
 ///
 ///     //      c[0] c[1]
 ///     // r[0]    1    1
 ///     // r[1]    0   -1
 /// }
-/// fn f(xs: ArrayView1<AD>) -> Array1<AD> {
+/// fn f(xs: ArrayView1<AD>, update: &mut Array1<AD>) {
 ///     let x = xs[0];
 ///     let y = xs[1];
 ///
-///     array![x - y, x + 2. * y]
+///     update[0] = x - y;
+///     update[1] = x + 2. * y;
 /// }
 /// ```
 #[allow(non_snake_case)]

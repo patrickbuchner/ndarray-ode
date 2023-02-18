@@ -1,5 +1,4 @@
 use crate::{ad::*, ode::*};
-use indicatif::ProgressIterator;
 use ndarray::*;
 use tqdm::tqdm;
 
@@ -88,7 +87,7 @@ where
         let mut slope_buffer = x0.clone();
 
         if self.with_progress {
-            for t in tqdm(1..n) {
+            for t in tqdm(1..n).width(Some(100)) {
                 x0 = self.execute(t, x0, &mut result, &mut time, &mut J, &mut slope_buffer);
             }
         } else {

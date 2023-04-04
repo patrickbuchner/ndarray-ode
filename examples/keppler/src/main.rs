@@ -26,7 +26,10 @@ fn main() {
     ];
 
     let current_dir = Path::new(".");
-    let folder = current_dir.join("ndarray_ode").join("examples").join("keppler");
+    let folder = current_dir
+        .join("ndarray_ode")
+        .join("examples")
+        .join("keppler");
     run(ode, x0, h, T, &folder);
 
     plot::python(folder.join("plot_keppler.py"), &vec![""]);

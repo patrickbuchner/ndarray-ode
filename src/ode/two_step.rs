@@ -13,7 +13,7 @@ where
     x1: Array1<AD>,
     h: f64,
     T: f64,
-    _ɛ: f64,
+    ɛ: f64,
 }
 impl<Scheme> OdeTwoStep<Scheme>
 where
@@ -26,7 +26,7 @@ where
             x1,
             h: 0.1,
             T: 1.0,
-            _ɛ: f64::EPSILON,
+            ɛ: 10e-9,
         }
     }
 }
@@ -63,15 +63,9 @@ where
         let mut J = Array2::zeros((l, l));
         let mut slope_buffer = x0.to_ad();
 
-        for t in tqdm(2..n) {
+        for t in 2..n {
             self.scheme.update(x0.to_ad(), x1.to_ad());
-            match newton(
-                f64::EPSILON,
-                &self.scheme,
-                x1.to_ad(),
-                &mut J,
-                &mut slope_buffer,
-            ) {
+            match newton(self.ɛ, &self.scheme, x1.to_ad(), &mut J, &mut slope_buffer) {
                 Ok(x2) => {
                     let x2 = x2.to_f64();
                     result.push_row(x2.view()).unwrap();

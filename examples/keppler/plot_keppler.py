@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import sys
 method = sys.argv[1]
 
-folder = 'examples/keppler/'
+folder = 'ndarray_ode/examples/keppler/'
 # Import netCDF file
 file = folder + "keppler_implicit.parquet"
 data = pq.read_table(file)

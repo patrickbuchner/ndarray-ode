@@ -157,6 +157,7 @@ where
             for (c, s) in col.iter_mut().zip(slopes.iter()) {
                 *c = s.dx();
             }
+            x_ad[i][1] = 0f64;
         });
 }
 

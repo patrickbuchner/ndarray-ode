@@ -14,13 +14,13 @@ description = "ODE Solver based on ndarray ecosystem"
 itertools = "0.10.5"
 ndarray = { version = "0.15.6", features = ["rayon", "blas"] }
 ndarray-linalg = { version = "0.16.0", features = ["openblas"] }
-polars = { version = "0.26.1", features = ["parquet"] }
+polars = { version = "0.28", features = ["parquet"] }
 rayon = "1.6.1"
 tqdm = "0.4.3"
 
 [dev-dependencies]
 criterion = "0.4"
-rstest = "0.16.0"
+rstest = "0.17.0"
 proptest = "1.0.0"
 openblas-src = { version = "0.10.8", features = ["static"] }
 
@@ -29,9 +29,9 @@ name = "solver"
 harness = false
 
 
-[workspace]
-members = ["examples/*"]
+# [workspace]
+# members = ["examples/*"]
 
-[profile.release]
-debug = true
+# [profile.release]
+# debug = true
 
